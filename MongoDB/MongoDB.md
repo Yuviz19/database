@@ -1,0 +1,109 @@
+# MongoDB
+
+- Install Mongo from the official documentation
+- start the server and run 'mongosh'
+
+- this will open on a 'test' database
+
+- 'show dbs' -> list all the databases
+  - admin
+  - config
+  - local -> are all the pre-existing databases (don't remove them)
+
+- 'use db_name' -> to switch to a database
+  - if db_name doesn't exists in the list, shell creates one
+  - this still doesn't lists it in until anything is written in it
+
+## MongoDB Terminology
+
+| SQL      | MongoDB    |
+| -------- | ---------- |
+| Database | Database   |
+| Table    | Collection |
+| Row      | Document   |
+| Column   | Field      |
+
+- 'db.createCollection("collection_name")' -> create a new collection in a database
+  - 'show collections' -> show all the collections inside a database
+- 'db.dropDatabase()' -> drop the current database (the one inside you are)
+
+- 'db.collection_name.insertOne()' -> used to insert a document inside a collection
+  - if collection_name doesn't exists, one is created
+  - insertOne is used to insert one document
+
+```shell
+db.students.insertOne({
+name:"Spongebob",
+age: 30,
+gpa: 3.7
+})
+```
+
+- 'db.collection_name.find()' -> lists all the documents in a collection (in json format)
+
+- 'db.collection_name.insertMany([{},{},{}....])' -> insert as many docs as u want (with [], brackets)
+  - all documents doesn't need to be consistent, and can have as many fields as u want.
+
+## MongoDB Data Types
+
+- while inserting data into documents, the several data types are incorporated
+  1. String - within "" or '' (can contain spaces and special characters)
+  2. Integer - a whole number (no decimal numbers)
+  3. Double - contain decimals
+  4. Boolean - either true or false
+  5. Date - to use date as a data type use 'new Date()' -> gives current date and time, otherwise pass one within "..."
+  6. Null - generally used to create a placeholder
+  7. Array - a field with more than one value
+  8. Nested Documents - json data in a field enclosed within {}, this can have multiple docs with []
+
+## Sorting and Limiting
+
+### Sorting
+
+- 'db.collection_name.find()' -> used to list all the documents in a collection
+- 'db.collection_name.find().sort({field_name:1})' -> used to list all the documents within sorted order
+  - '-1' for descending order
+
+- the documents are sorted with ObjectId by default
+
+### Limiting
+
+- this is used to limit the number of documents, that are returned to us
+- 'db.collection_name.find().limit(2)' -> returns 2 documents
+
+## Find Method
+
+- very much similar to WHERE clause in SQL
+- '.find()' -> returns all the documents
+
+- to get specific docs, we add arguments
+- 'db.collection_name.find({query},{projection})'
+- example -
+  - db.students.find({name:"Spongebob"}) -> returns the document of Spongebob
+    - u can use more than one filter for query (, separated)
+
+-- projection is similar to SELECT clause in SQL
+
+- with the projection parameter - we can decide what fields do we want to return
+- example -
+  - db.students.find({},{\_id: false, name: true, gpa: true}) -> if query is empty, all documents will be returned
+  - by default \_id is set true
+
+## Update
+
+- 'db.collection_name.updateOne(filter, update)'
+
+-- filter -> to apply that updation to
+-- update -> tells what updation to do
+
+- example -
+  - db.collection_name.updateOne({name: "Spongebob"},{$set: {fullTime: true}})
+    - if this field exists -> update
+    - if not -> create a new field
+  - in a collection it is possible for multiple docs to have same name, hence try to change stuff with ObjectId
+- to remove a field, use the $unset operator as $unset: {fullTime: ""}
+
+-- updateMany - used to update many documents at once
+
+- 'db.students.updateMany({fullTime:{$exists: false}}, {$set:{fullTime: true}})'
+  - if some field doesn't exists, then update it, so that it does
