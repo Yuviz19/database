@@ -24,8 +24,17 @@
 | Column   | Field      |
 
 - 'db.createCollection("collection_name")' -> create a new collection in a database
+  - other options
+    - db.createCollection("collection_name", {capped: true, size: 1048576, max: 100},{autoIndexId: true})
+    - capped -> set a cap limit
+    - size -> size of cap (in bytes)(10Mib here)
+    - max -> max number of documents
+    - autoIndexId -> true or false
   - 'show collections' -> show all the collections inside a database
+
 - 'db.dropDatabase()' -> drop the current database (the one inside you are)
+- 'show collections' -> get all the collections in a database
+- 'db.collection_name.drop()' -> delete a collection
 
 - 'db.collection_name.insertOne()' -> used to insert a document inside a collection
   - if collection_name doesn't exists, one is created
@@ -107,3 +116,106 @@ gpa: 3.7
 
 - 'db.students.updateMany({fullTime:{$exists: false}}, {$set:{fullTime: true}})'
   - if some field doesn't exists, then update it, so that it does
+
+## Delete
+
+- In the Compass it is fairly easy, as u only have to press the trash can icon
+- for the shell,
+  - 'db.collection_name.deleteOne() or db.collection_name.deleteMany()'
+  - it takes one parameter, {} -> the filter parameter
+- example -> db.students.deleteOne({name:"Larry"})
+  db.students.deleteMany({registrationDate:{$exists: false}})
+
+## Comparison Operator
+
+- db.collection_name.find({name: {$ne:"Spongebob"}}) -> returns everything except Spongebob
+- db.collection_name.find({age: {$lt: 20}}) -> returns docs with age less than 20
+  - u can also use less than equal to (lte)
+- similar operators are $gt, $gte
+- for getting a range db.collection_name.find({gpa:{$gte: 3, $lte: 4}})
+
+- in operator
+  - db.collection_name.find({name:{$in:["Spongebob", "Patrick", "Squidward"]}})
+  - use an array, to get the names that lies within that array
+  - u can also use 'not in' -> "nin" at the place of in
+
+## Logical Operators
+
+- return data based on expression's true or false value
+  1. $and -> join query clauses and returns documents that match both conditions
+  2. $or -> returns docs that match any one condition
+  3. $not -> returns docs that match none of the conditions
+  4. $nor
+
+- for these to work, wrap all the conditions in []
+
+- examples
+
+1. AND -> fulltime && age lte 22
+   db.collection_name.find({$and:[{fullTime: true},{age:{$lte: 22}}]})
+
+2. OR -> 'same condition' at least one is true
+   db.collection_name.find({$or:[{fullTime: true},{age:{$lte: 22}}]})
+
+3. NOR -> 'same conditions' where both the conditions are false
+   db.collection_name.find({$nor:[{fullTime: true},{age:{$lte: 22}}]})
+
+4. NOT -> find students that are not above 30 (in age)
+   db.collection_name.find({age:{$not:{$gte:30}})
+   this query also provides null values
+
+## Indexes
+
+- Indexes offer efficient execution of queries in MongoDB.
+  - without it MongoDB must perform a collection scan (scan every doc)
+  - select the doc that matches the conditions
+
+- however it takes more memory and slows the insertion, update and delete operations
+
+- example
+  - let - u search for a name among the docs
+  - db.collection_name.find({name: "Larry"})
+  - what this does it does a linear search of the documents (this would take time for large amounts of data)
+
+- indexes are special data structures that store a tiny fraction of our collections in orderd format
+- this is done to make the data more searchable (not manual searching)
+
+### Under the hood
+
+- they implement a B-tree
+- example
+- When you tell MongoDB to index a field (like email), it extracts the email from every document, sorts them, and arranges them into a B-Tree (Balanced Tree) data structure.
+
+- the B-Tree has the value and a pointer (exact location of data)
+
+### Common Type of Indexes
+
+- default '\_id' - created by MongoDB
+- single field index - for one specific field
+  - 1 and -1 show descending and ascending orders
+  - db.collection_name.createIndex({email:1})
+- compound field indexes - multiple fields make the index value
+  - db.users.createIndex({ lastname: 1, firstname: 1 })
+- multikey index - if a field has an array, and that is converted to an index
+  - a multikey index is created
+    > tags: ['tech', 'news']
+    > db.articles.createIndex({ tags: 1 })
+
+#### The Index Tax
+
+- every time u make an insert, update or delete operation, MongoDB
+  1. updates the database
+  2. rearrange the b-tree for every single index
+
+- for too few indexes -> slow read queries (system bottleneck)
+- for too many indexes -> slow write queries and high RAM/disk usage
+
+- to check if a query used an index
+  db.users.find({ email: "<test@example.com>" }).explain("executionStats")
+
+- to get all the indexes of a collection
+  - db.collection_name.getIndexes()
+- to drop an index
+  - db.collection_name.dropIndex("index_name")
+
+# RECOMMENDATION -> use indexes, if a lot of searching is being done rather than CRUD

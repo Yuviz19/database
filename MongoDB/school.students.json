@@ -1,0 +1,55 @@
+[{
+  "_id": {
+    "$oid": "6a355d64189c28fe0ed2695b"
+  },
+  "name": "Spongebob",
+  "age": 30,
+  "gpa": 3.4
+},
+{
+  "_id": {
+    "$oid": "6a3565bb189c28fe0ed2695c"
+  },
+  "name": "Patrick",
+  "age": 38,
+  "gpa": 1.5
+},
+{
+  "_id": {
+    "$oid": "6a3565bb189c28fe0ed2695d"
+  },
+  "name": "Sqwidward",
+  "age": 57,
+  "gpa": 2.5
+},
+{
+  "_id": {
+    "$oid": "6a3565bb189c28fe0ed2695e"
+  },
+  "name": "Crabs",
+  "age": 67,
+  "gpa": 2.1
+},
+{
+  "_id": {
+    "$oid": "6a356d70189c28fe0ed26961"
+  },
+  "name": "Plankton",
+  "age": 17,
+  "gpa": 3.1,
+  "fullTime": false,
+  "registerDate": {
+    "$date": "2026-06-19T16:25:20.603Z"
+  },
+  "graduationDate": null,
+  "courses": [
+    "Biology",
+    "Chemistry",
+    "Calculus"
+  ],
+  "address": {
+    "street": "123 Fake St.",
+    "city": "Bikini Bottom",
+    "Country": "Pacific Ocean"
+  }
+}]
