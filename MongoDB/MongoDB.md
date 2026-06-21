@@ -32,6 +32,73 @@
     - autoIndexId -> true or false
   - 'show collections' -> show all the collections inside a database
 
+- while creating a collection, we can also add some validations
+  - so that inconsistent data is not being inserted
+
+```js
+db.createCollection("books", {
+  validotor: {
+    $jsonSchema: {
+      required: ["name", "price"],
+      properties: {
+        name: {
+          bsonType: "string",
+          description: "must be a string and required",
+        },
+        price: {
+          bsonType: "number",
+          description: "must be a number and required",
+        },
+      },
+    },
+  },
+  validationAction: "warn", // by default error
+  // warned data still gets inserted
+  // error data does not
+});
+```
+
+- to edit a validator
+
+```js
+db.runCommand({
+  collMod: "books", // collection modifier
+  validotor: {
+    $jsonSchema: {
+      required: ["name", "price", "authors"],
+      properties: {
+        name: {
+          bsonType: "string",
+          description: "must be a string and required",
+        },
+        price: {
+          bsonType: "number",
+          description: "must be a number and required",
+        },
+        authors: {
+          bsonType: "array",
+          description: "must be an array and required",
+          items: {
+            bsonType: "object", // a json file itself
+            required: ["name", "email"],
+            properties: {
+              name: {
+                bsonType: "string",
+                description: "must be a string and required",
+              },
+              email: {
+                bsonType: "string",
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+  validationAction: "warn",
+});
+```
+
 - 'db.dropDatabase()' -> drop the current database (the one inside you are)
 - 'show collections' -> get all the collections in a database
 - 'db.collection_name.drop()' -> delete a collection
@@ -52,6 +119,12 @@ gpa: 3.7
 
 - 'db.collection_name.insertMany([{},{},{}....])' -> insert as many docs as u want (with [], brackets)
   - all documents doesn't need to be consistent, and can have as many fields as u want.
+  - insertMany also takes some options as arguments
+    1. ordered (true by default)
+    - if we insert some docs, and any one in between fails
+    - the rest also do not get inserted
+    - use {ordered: false}, to remove this fallacy
+    1. write concern (can be used by insertOne too)
 
 ## MongoDB Data Types
 
@@ -64,6 +137,7 @@ gpa: 3.7
   6. Null - generally used to create a placeholder
   7. Array - a field with more than one value
   8. Nested Documents - json data in a field enclosed within {}, this can have multiple docs with []
+  - aka 'object'
 
 ## Sorting and Limiting
 
@@ -98,6 +172,12 @@ gpa: 3.7
   - db.students.find({},{\_id: false, name: true, gpa: true}) -> if query is empty, all documents will be returned
   - by default \_id is set true
 
+
+### Counting
+
+- after the find command, if u want to count the number of results shown are
+- ...find(...).count()
+
 ## Update
 
 - 'db.collection_name.updateOne(filter, update)'
@@ -116,6 +196,11 @@ gpa: 3.7
 
 - 'db.students.updateMany({fullTime:{$exists: false}}, {$set:{fullTime: true}})'
   - if some field doesn't exists, then update it, so that it does
+
+### $type
+
+- similar to $exists
+- $type is used to check the type of a particular field
 
 ## Delete
 
@@ -162,6 +247,16 @@ gpa: 3.7
 
 4. NOT -> find students that are not above 30 (in age)
    db.collection_name.find({age:{$not:{$gte:30}})
+
+### Counting
+
+- after the 
+### Counting
+
+- after the 
+### Counting
+
+- after the 
    this query also provides null values
 
 ## Indexes
@@ -218,4 +313,5 @@ gpa: 3.7
 - to drop an index
   - db.collection_name.dropIndex("index_name")
 
-# RECOMMENDATION -> use indexes, if a lot of searching is being done rather than CRUD
+#RECOMMENDATION
+> use indexes, if a lot of searching is being done rather than CRUD

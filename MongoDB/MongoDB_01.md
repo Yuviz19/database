@@ -122,3 +122,29 @@ const taskSchema = new Schema({
   },
 });
 ```
+
+## Write Concerns
+
+- this is another of the flags that are provided with the CRUD operations
+- syntax: {w: value, j: boolean, wtimeout: number (for time in ms)}
+  - w -> this is used to provide acknowledgement
+    - provide 0, if u don't want the db to acknowledge the changes
+  - j -> this is used to put the log of some operation into the db journal
+    - this is important, so that in case of some disaster
+    - the transaction that was interrupted, continues when the network is restored
+    - false by default
+  - wtimeout -> this is used to set a max time in ms, for a transaction to perform
+    - any transaction that exceeds this time limit
+    - is aborted
+
+- w and j changes the speed of execution of a transaction
+
+- collection_name.insert({value}, {writeConcern:{w:0, j: true, wtimeout: 1000}})
+
+### Atomicity in MongoDB
+
+- it is all-or-nothing execution of database operations
+- ensuring that partial commits do not take place
+
+- by default, Atomicity is guaranteed at single document level
+  - a document partially is not loaded to the database
