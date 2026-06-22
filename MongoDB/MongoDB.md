@@ -177,6 +177,8 @@ gpa: 3.7
 
 - after the find command, if u want to count the number of results shown are
 - ...find(...).count()
+  - this is getting depricated
+- use db.enrollement.countDocuments
 
 ## Update
 
@@ -247,17 +249,6 @@ gpa: 3.7
 
 4. NOT -> find students that are not above 30 (in age)
    db.collection_name.find({age:{$not:{$gte:30}})
-
-### Counting
-
-- after the 
-### Counting
-
-- after the 
-### Counting
-
-- after the 
-   this query also provides null values
 
 ## Indexes
 
