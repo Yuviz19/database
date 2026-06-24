@@ -181,7 +181,7 @@
 ]
 ```
 
-4. find the total number of males and females
+4. find the total number of males and females ($group, $sum)
 ```js
 [
   {
@@ -195,7 +195,7 @@
 ]
 ```
 
-5. Which country has the highest number of registerd users
+5. Which country has the highest number of registerd users ($group, $sum, $sort, $limit)
 ```js
 [
   {
@@ -217,7 +217,7 @@
 ]
 ```
 
-6. List all the unique eye colors in the the collection
+6. List all the unique eye colors in the the collection ($group, $addToSet)
 ```js
 [
   {
@@ -231,7 +231,7 @@
 ]
 ```
 
-7. What is the average number of tags per user
+7. What is the average number of tags per user ($unwind, $group, $sum, $avg)($addFields, $avg)
 - approach 1
 - use $unwind -> what this does is that it makes more documents, with everything similar
 - but just with different array elements
@@ -278,7 +278,7 @@
 ]
 ```
 
-8. How many users have 'enim' as one of their tags
+8. How many users have 'enim' as one of their tags ($match, $count)
 ```js
 [
   {
@@ -292,7 +292,7 @@
 ]
 ```
 
-9. What are the names and age of users, who are inactive and have 'velit' as a tag
+9. What are the names and age of users, who are inactive and have 'velit' as a tag ($match, $project)
 ```js
 [
   {
@@ -311,7 +311,7 @@
 ]
 ```
 
-10. How many docs have phone number starting with '+1 (940)'
+10. How many docs have phone number starting with '+1 (940)' ($match with regex, $count)
 ```js
 [
   {
@@ -325,7 +325,7 @@
 ]
 ```
 
-11. Who has registered most recently
+11. Who has registered most recently ($sort, $limit, $project)
 ```js
 [
   {
@@ -347,7 +347,7 @@
 ]
 ```
 
-12. Categorize user by their favorite fruit
+12. Categorize user by their favorite fruit ($group, $push)
 ```js
 [
   {
@@ -361,4 +361,135 @@
 ]
 ```
 
-13. How many users have 'ad', as their second tag in their tag list
+13. How many users have 'ad', as their second tag in their tag list ($match, $count)
+```js
+[
+  {
+    $match: {
+    	"tags.1":"ad"
+    }
+  },
+  {
+    $count: 'adTagHolders'
+  }
+]
+```
+
+14. Find users that have both 'enim' and 'id' as their tags ($match, $count) ($match, $all)
+```js
+[
+  {
+    $match: {
+      tags: "enim",
+      tags: "id"
+    }
+  },
+  {
+    $count: 'enim_id_holders'
+  }
+]
+---- method 2 ----
+// use $all. selects the documents that satisfies all the criterias
+
+[
+  {
+   $match: {
+     tags:{
+       $all: ["enim","id"]
+     }
+   }
+  },
+] 
+```
+
+15. List all the companies that are based in the USA, and their corresponding user count ($match, $group, $sum)
+```js
+[
+  {
+    $match: {
+      "company.location.country": "USA"
+    }
+  },
+  {
+    $group: {
+      _id: "$company.title",
+			userCount:{
+        $sum: 1
+      }
+    }
+  }
+]
+```
+
+## Lookup and Joining of the tables
+
+- lookup syntax
+```js
+[
+  {
+    $lookup: {
+      from: collection,     // from what collection to join
+      localField: field,    // name of the local field in the current collection
+      foreignField: field,  // name of the field in the foreign field (the one in the other collection)
+      as: result            // what the field is to be known as 
+    }
+  }
+]
+```
+
+- an example of this would be
+
+```js
+[
+  {
+    $lookup: {
+      from: "authors",
+      localField: "author_id",
+      foreignField: "_id",
+      as: "author_details"
+    }
+  }
+]
+```
+
+- this returns an array "author_details" with an object at it's 0th index,
+- the object contains the author doc as it is.
+```js
+[
+  {
+    $lookup: {
+      from: "authors",
+      localField: "author_id",
+      foreignField: "_id",
+      as: "author_details"
+    }
+  },
+  {
+    $addFields: {
+      author_details: {
+        $first: "$author_details"
+      }
+    }
+  }
+]
+
+---- another method ----
+
+[
+  {
+    $lookup: {
+      from: "authors",
+      localField: "author_id",
+      foreignField: "_id",
+      as: "author_details"
+    }
+  },
+  {
+    $addFields: {
+      author_details: {
+        $arrayElemAt:["$author_details",0] // 1st arg takes the name of the array and the second takes the index
+      }
+    }
+  }
+]
+```
